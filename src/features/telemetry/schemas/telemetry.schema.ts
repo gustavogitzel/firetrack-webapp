@@ -28,7 +28,7 @@ export const FireEventsListSchema = z.array(FireEventSummarySchema);
 // ── Fire Event Detail (detail endpoint: /api/v1/fire-events/:id) ────
 
 export const AnomalyPointSchema = z.object({
-  id: z.string().uuid(),
+  id: z.union([z.string(), z.number()]),
   latitude: z.number(),
   longitude: z.number(),
   detected_at: z.string(),
