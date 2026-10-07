@@ -50,10 +50,16 @@ export const FireEventDetailSchema = z.object({
 // ── Weather (point-level: /api/v1/weather/snapshot) ─────────────────
 
 export const WeatherSnapshotSchema = z.object({
+  temperature_2m: z.number().nullable().optional(),
   temperature_c: z.number().nullable().optional(),
+  relative_humidity_2m: z.number().nullable().optional(),
   relative_humidity_pct: z.number().nullable().optional(),
+  wind_speed_10m: z.number().nullable().optional(),
   wind_speed_kmh: z.number().nullable().optional(),
+  wind_direction_10m: z.number().nullable().optional(),
   precipitation_mm: z.number().nullable().optional(),
+  status: z.string().optional(),
+  source: z.string().optional(),
 });
 
 // ── Inferred Types ──────────────────────────────────────────────────
