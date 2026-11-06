@@ -11,8 +11,13 @@ import {
   enableClusteringAtom,
   enableHeatmapAtom,
   enableRegionRiskMapAtom,
+  mapDisplayModeAtom,
 } from '@/state/filters.atoms';
 import { useFireEventsQuery } from '@/features/telemetry/api/useFireEventsQuery';
+import { useHotspotsQuery } from '@/features/telemetry/api/useHotspotsQuery';
+import type { HotspotProperties } from '@/features/telemetry/schemas/telemetry.schema';
+import { HOTSPOT_SOURCE_COLORS } from '@/features/telemetry/utils/hotspot-labels';
+import { HotspotPopup } from '@/shared/components/molecules/HotspotPopup';
 import { toGeoJsonFeatureCollection } from '@/features/spatial/utils/geojson-transformers';
 import { toAdaptiveRiskGeoJson } from '@/features/spatial/utils/adaptive-risk-geojson';
 import { Sidebar } from '@/shared/components/organisms/Sidebar';
@@ -113,8 +118,15 @@ export function MapPage() {
   const [enableClustering] = useAtom(enableClusteringAtom);
   const [enableHeatmap] = useAtom(enableHeatmapAtom);
   const [enableRegionRiskMap] = useAtom(enableRegionRiskMapAtom);
+  const [displayMode] = useAtom(mapDisplayModeAtom);
+  const [selectedHotspot, setSelectedHotspot] = useState<{
+    longitude: number;
+    latitude: number;
+    properties: HotspotProperties;
+  } | null>(null);
 
   const { data: fireEvents } = useFireEventsQuery();
+  const { data: hotspots } = useHotspotsQuery(displayMode === 'hotspots');
 
   const geojsonData = useMemo(() => {
     if (!fireEvents) return null;
@@ -151,10 +163,9 @@ export function MapPage() {
 
       // Handle Cluster Click -> Zoom in
       if (clusterId !== undefined && mapInstance) {
-        const source: any = mapInstance.getSource('fire-events');
+        const source: any = mapInstance.getSource(feature.source);
         if (source && typeof source.getClusterExpansionZoom === 'function') {
-          source.getClusterExpansionZoom(clusterId, (err: any, zoom: number) => {
-            if (err) return;
+          source.getClusterExpansionZoom(clusterId).then((zoom: number) => {
             const geom = feature.geometry as GeoJSON.Point;
             mapInstance.easeTo({
               center: geom.coordinates as [number, number],
@@ -163,6 +174,17 @@ export function MapPage() {
             });
           });
         }
+        return;
+      }
+
+      // Handle Hotspot Click -> Show detection popup
+      if (feature.layer.id === 'hotspot-point') {
+        const geom = feature.geometry as GeoJSON.Point;
+        setSelectedHotspot({
+          longitude: geom.coordinates[0],
+          latitude: geom.coordinates[1],
+          properties: feature.properties as HotspotProperties,
+        });
         return;
       }
 
@@ -176,12 +198,15 @@ export function MapPage() {
   );
 
   const interactiveLayerIds = useMemo(() => {
+    if (displayMode === 'hotspots') {
+      return ['hotspot-clusters', 'hotspot-point'];
+    }
     const ids = ['unclustered-fire-point'];
     if (enableClustering) {
       ids.push('fire-clusters');
     }
     return ids;
-  }, [enableClustering]);
+  }, [enableClustering, displayMode]);
 
   return (
     <MapContext.Provider value={mapInstance}>
@@ -273,7 +298,79 @@ export function MapPage() {
               </Source>
             )}
 
-            {geojsonData && (
+            {displayMode === 'hotspots' && hotspots && (
+              <Source
+                id="hotspots"
+                type="geojson"
+                data={hotspots}
+                cluster={true}
+                clusterMaxZoom={12}
+                clusterRadius={40}
+              >
+                <Layer
+                  id="hotspot-clusters"
+                  type="circle"
+                  filter={['has', 'point_count']}
+                  paint={{
+                    'circle-color': [
+                      'step',
+                      ['get', 'point_count'],
+                      '#f97316',
+                      50,
+                      '#ef4444',
+                      500,
+                      '#b91c1c',
+                    ],
+                    'circle-radius': ['step', ['get', 'point_count'], 14, 50, 20, 500, 28],
+                    'circle-stroke-width': 2,
+                    'circle-stroke-color': '#ffffff',
+                    'circle-opacity': 0.9,
+                  }}
+                />
+                <Layer
+                  id="hotspot-cluster-count"
+                  type="symbol"
+                  filter={['has', 'point_count']}
+                  layout={{
+                    'text-field': '{point_count_abbreviated}',
+                    'text-size': 11,
+                    'text-allow-overlap': true,
+                  }}
+                  paint={{ 'text-color': '#ffffff' }}
+                />
+                <Layer
+                  id="hotspot-point"
+                  type="circle"
+                  filter={['!', ['has', 'point_count']]}
+                  paint={{
+                    'circle-color': [
+                      'match',
+                      ['get', 'source'],
+                      'NASA_FIRMS',
+                      HOTSPOT_SOURCE_COLORS.NASA_FIRMS,
+                      HOTSPOT_SOURCE_COLORS.INPE,
+                    ],
+                    'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 3, 12, 7],
+                    'circle-stroke-width': 1,
+                    'circle-stroke-color': '#000000',
+                    'circle-opacity': 0.95,
+                  }}
+                />
+              </Source>
+            )}
+
+            {displayMode === 'hotspots' && selectedHotspot && (
+              <HotspotPopup
+                {...selectedHotspot}
+                onClose={() => setSelectedHotspot(null)}
+                onOpenEvent={(eventId) => {
+                  setSelectedEventId(eventId);
+                  setSelectedHotspot(null);
+                }}
+              />
+            )}
+
+            {displayMode === 'events' && geojsonData && (
               <Source
                 key={`fire-events-src-${enableClustering ? 'clustered' : 'unclustered'}`}
                 id="fire-events"

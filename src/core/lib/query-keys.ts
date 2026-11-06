@@ -5,6 +5,9 @@ export const queryKeys = {
       [...queryKeys.telemetry.all, 'current', filters] as const,
     detail: (id: string | null) =>
       [...queryKeys.telemetry.all, 'detail', id] as const,
+    hotspots: (filters: { hours: number; biome?: string | null }) =>
+      [...queryKeys.telemetry.all, 'hotspots', filters] as const,
+    lastUpdate: ['telemetry', 'last-update'] as const,
   },
   spatial: {
     all: ['spatial'] as const,

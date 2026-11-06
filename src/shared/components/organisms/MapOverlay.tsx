@@ -1,7 +1,9 @@
 import { useDerivedMetrics } from '@/features/dashboard/hooks/useDerivedMetrics';
-import { Flame, AlertTriangle, Loader2 } from 'lucide-react';
+import { Flame, AlertTriangle } from 'lucide-react';
 import { TimeWindowSelector } from '../molecules/TimeWindowSelector';
 import { BiomeSelector } from '../molecules/BiomeSelector';
+import { DisplayModeSelector } from '../molecules/DisplayModeSelector';
+import { LastUpdateBadge } from '../molecules/LastUpdateBadge';
 import { StatCard } from '../atoms/StatCard';
 
 export function MapOverlay() {
@@ -11,20 +13,14 @@ export function MapOverlay() {
     <div className="absolute top-0 left-0 z-10 w-full h-full pointer-events-none p-4 md:p-6 flex flex-col justify-between">
       {/* Top Floating Controls */}
       <div className="flex justify-between items-start pointer-events-none">
-        {/* Left Side: Sync indicator if fetching */}
+        {/* Left Side: Last database update (spinner while fetching) */}
         <div className="pointer-events-auto">
-          {isFetching && (
-            <div className="flex items-center gap-2 text-white/70 bg-black/60 backdrop-blur-xl px-3.5 py-2 rounded-2xl border border-white/10 shadow-lg">
-              <Loader2 className="w-4 h-4 text-red-400 animate-spin" />
-              <span className="text-xs font-semibold tracking-wider">
-                Atualizando telemetria orbital...
-              </span>
-            </div>
-          )}
+          <LastUpdateBadge isFetching={isFetching} />
         </div>
 
-        {/* Right Side: Time and Biome Filter Selectors */}
+        {/* Right Side: Display Mode, Time and Biome Filter Selectors */}
         <div className="pointer-events-auto flex flex-col items-end gap-2">
+          <DisplayModeSelector />
           <TimeWindowSelector />
           <BiomeSelector />
         </div>

@@ -9,6 +9,12 @@ export type Biome = (typeof BIOMES)[number];
 
 export const biomeFilterAtom = atom<Biome | null>(null);
 
+export type MapDisplayMode = 'events' | 'hotspots';
+
+export const mapDisplayModeAtom = atom<MapDisplayMode>('events');
+
+export const HOTSPOTS_MAX_HOURS = 72;
+
 export type BaseMapStyle = 'dark' | 'satellite' | 'streets';
 
 export const baseMapStyleAtom = atom<BaseMapStyle>('dark');

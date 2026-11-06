@@ -45,3 +45,15 @@
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
+/* Map popups: drop MapLibre default white card and tip */
+.firetrack-popup .maplibregl-popup-content {
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  border-radius: 1rem;
+}
+
+.firetrack-popup .maplibregl-popup-tip {
+  display: none;
+}

@@ -49,6 +49,48 @@ export const FireEventDetailSchema = z.object({
   anomalies: z.array(AnomalyPointSchema),
 });
 
+// ── Hotspots (individual detections: /api/v1/anomalies/current) ─────
+
+export const HotspotPropertiesSchema = z.object({
+  id: z.number(),
+  satellite: z.string(),
+  detected_at: z.string(),
+  source: z.string(),
+  confidence: z.string().nullable(),
+  frp: z.number().nullable(),
+  municipality: z.string().nullable(),
+  state: z.string().nullable(),
+  biome: z.string().nullish(),
+  fire_event_id: z.string().nullish(),
+});
+
+export const HotspotCollectionSchema = z.object({
+  type: z.literal('FeatureCollection'),
+  features: z.array(
+    z.object({
+      type: z.literal('Feature'),
+      geometry: z.object({
+        type: z.literal('Point'),
+        coordinates: z.tuple([z.number(), z.number()]),
+      }),
+      properties: HotspotPropertiesSchema,
+    }),
+  ),
+});
+
+// ── Last update (/api/v1/anomalies/last-update) ─────────────────────
+
+export const LastUpdateSchema = z.object({
+  last_updated_at: z.string().nullable(),
+  sources: z.array(
+    z.object({
+      source: z.string(),
+      last_ingested_at: z.string(),
+      last_detected_at: z.string(),
+    }),
+  ),
+});
+
 // ── Weather (point-level: /api/v1/weather/snapshot) ─────────────────
 
 export const WeatherSnapshotSchema = z.object({
@@ -71,3 +113,6 @@ export type FireEventSummary = z.infer<typeof FireEventSummarySchema>;
 export type FireEventDetail = z.infer<typeof FireEventDetailSchema>;
 export type AnomalyPoint = z.infer<typeof AnomalyPointSchema>;
 export type WeatherSnapshot = z.infer<typeof WeatherSnapshotSchema>;
+export type HotspotProperties = z.infer<typeof HotspotPropertiesSchema>;
+export type HotspotCollection = z.infer<typeof HotspotCollectionSchema>;
+export type LastUpdate = z.infer<typeof LastUpdateSchema>;
