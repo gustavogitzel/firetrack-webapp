@@ -16,6 +16,7 @@ export function useFireEventsQuery() {
         params: {
           hours: filters.hours,
           min_anomalies: filters.minAnomalies,
+          biome: filters.biome ?? undefined,
         },
       });
       return FireEventsListSchema.parse(response.data);

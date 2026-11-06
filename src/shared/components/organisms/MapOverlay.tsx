@@ -1,6 +1,7 @@
 import { useDerivedMetrics } from '@/features/dashboard/hooks/useDerivedMetrics';
 import { Flame, AlertTriangle, Loader2 } from 'lucide-react';
 import { TimeWindowSelector } from '../molecules/TimeWindowSelector';
+import { BiomeSelector } from '../molecules/BiomeSelector';
 import { StatCard } from '../atoms/StatCard';
 
 export function MapOverlay() {
@@ -22,9 +23,10 @@ export function MapOverlay() {
           )}
         </div>
 
-        {/* Right Side: Time Filter Selector */}
-        <div className="pointer-events-auto">
+        {/* Right Side: Time and Biome Filter Selectors */}
+        <div className="pointer-events-auto flex flex-col items-end gap-2">
           <TimeWindowSelector />
+          <BiomeSelector />
         </div>
       </div>
 

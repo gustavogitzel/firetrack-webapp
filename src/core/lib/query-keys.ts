@@ -1,7 +1,7 @@
 export const queryKeys = {
   telemetry: {
     all: ['telemetry'] as const,
-    current: (filters: { hours: number; minAnomalies?: number; minFrp?: number }) =>
+    current: (filters: { hours: number; minAnomalies?: number; minFrp?: number; biome?: string | null }) =>
       [...queryKeys.telemetry.all, 'current', filters] as const,
     detail: (id: string | null) =>
       [...queryKeys.telemetry.all, 'detail', id] as const,
