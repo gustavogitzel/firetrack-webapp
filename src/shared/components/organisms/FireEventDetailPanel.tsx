@@ -17,6 +17,7 @@ import { useFireEventDetailQuery } from '@/features/telemetry/api/useFireEventDe
 import { useFireNewsQuery } from '@/features/telemetry/api/useFireNewsQuery';
 import { useFireImagesQuery } from '@/features/telemetry/api/useFireImagesQuery';
 import { StatCard } from '../atoms/StatCard';
+import { SatelliteDetectionInfo } from '../atoms/SatelliteDetectionInfo';
 import { AnomalyTimelineItem } from '../molecules/AnomalyTimelineItem';
 import { SatelliteBreakdown } from '../molecules/SatelliteBreakdown';
 import { NewsArticleCard } from '../molecules/NewsArticleCard';
@@ -107,7 +108,10 @@ export function FireEventDetailPanel() {
                   <Flame className="w-5 h-5 animate-pulse" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-white tracking-tight">Evento de Incêndio</h2>
+                  <div className="flex items-center gap-1.5">
+                    <h2 className="text-lg font-bold text-white tracking-tight">Evento de Incêndio</h2>
+                    <SatelliteDetectionInfo subject="event" align="right" />
+                  </div>
                   <p className="text-xs text-white/40 font-mono mt-0.5">
                     ID: {selectedId?.slice(0, 13)}…
                   </p>

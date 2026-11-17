@@ -1,5 +1,6 @@
 import { Popup } from 'react-map-gl/maplibre';
 import { ArrowRight, Clock, Leaf, MapPin, X } from 'lucide-react';
+import { SatelliteDetectionInfo } from '../atoms/SatelliteDetectionInfo';
 import type { HotspotProperties } from '@/features/telemetry/schemas/telemetry.schema';
 import {
   CONFIDENCE_LABELS,
@@ -36,7 +37,7 @@ export function HotspotPopup({ longitude, latitude, properties, onClose, onOpenE
       maxWidth="280px"
       className="firetrack-popup"
     >
-      <div className="w-64 rounded-2xl bg-black/80 backdrop-blur-xl border border-white/10 shadow-2xl text-white overflow-hidden">
+      <div className="w-64 rounded-2xl bg-black/80 backdrop-blur-xl border border-white/10 shadow-2xl text-white">
         <div className="flex items-center justify-between gap-2 px-3.5 py-2.5 border-b border-white/10">
           <div className="flex items-center gap-2 min-w-0">
             <span
@@ -48,13 +49,16 @@ export function HotspotPopup({ longitude, latitude, properties, onClose, onOpenE
             </span>
             <span className="text-[10px] font-semibold text-white/50 truncate">{properties.satellite}</span>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-md text-white/40 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-            aria-label="Fechar"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center gap-0.5 shrink-0">
+            <SatelliteDetectionInfo subject="hotspot" align="right" />
+            <button
+              onClick={onClose}
+              className="p-1 rounded-md text-white/40 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              aria-label="Fechar"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         <div className="px-3.5 py-3 space-y-2 text-[11px] text-white/70">
@@ -102,7 +106,7 @@ export function HotspotPopup({ longitude, latitude, properties, onClose, onOpenE
         {properties.fire_event_id && (
           <button
             onClick={() => onOpenEvent(properties.fire_event_id!)}
-            className="w-full flex items-center justify-center gap-1.5 px-3.5 py-2.5 border-t border-white/10 bg-red-500/10 text-red-400 text-[11px] font-bold hover:bg-red-500/20 transition-colors cursor-pointer"
+            className="w-full flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-b-2xl border-t border-white/10 bg-red-500/10 text-red-400 text-[11px] font-bold hover:bg-red-500/20 transition-colors cursor-pointer"
           >
             Ver evento de incêndio
             <ArrowRight className="w-3.5 h-3.5" />
