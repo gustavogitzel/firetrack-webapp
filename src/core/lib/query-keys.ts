@@ -16,6 +16,14 @@ export const queryKeys = {
     all: ['spatial'] as const,
     municipality: (ibgeCode: number) =>
       [...queryKeys.spatial.all, 'municipality', ibgeCode] as const,
+    municipalities: (state: string) => [...queryKeys.spatial.all, 'municipalities', state] as const,
+  },
+  analytics: {
+    all: ['analytics'] as const,
+    history: (params: Record<string, string | number | undefined>) =>
+      [...queryKeys.analytics.all, 'history', params] as const,
+    causes: (params: Record<string, string | number | undefined>) =>
+      [...queryKeys.analytics.all, 'causes', params] as const,
   },
   system: {
     health: ['system', 'health'] as const,

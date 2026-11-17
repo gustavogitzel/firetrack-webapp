@@ -6,6 +6,9 @@ import { activeViewAtom } from '@/state/navigation.atoms';
 import { StatCard } from '../atoms/StatCard';
 import { SatelliteBreakdown } from '../molecules/SatelliteBreakdown';
 import { TimeWindowSelector } from '../molecules/TimeWindowSelector';
+import { AnalyticsRegionFilter } from '@/features/analytics/components/AnalyticsRegionFilter';
+import { HotspotHistorySection } from '@/features/analytics/components/HotspotHistorySection';
+import { CauseBreakdownSection } from '@/features/analytics/components/CauseBreakdownSection';
 
 export function AnalyticsPanel() {
   const [activeView, setActiveView] = useAtom(activeViewAtom);
@@ -16,7 +19,6 @@ export function AnalyticsPanel() {
 
   if (!isOpen) return null;
 
-  // Group events by municipality/state for ranking
   const stateRanking = (fireEvents ?? []).reduce<Record<string, { count: number; totalFrp: number }>>(
     (acc, ev) => {
       const state = ev.state ?? 'Outros';
@@ -38,8 +40,7 @@ export function AnalyticsPanel() {
   }, {});
 
   return (
-    <div className="absolute top-0 right-0 z-20 h-full w-full max-w-md bg-neutral-950/85 backdrop-blur-3xl border-l border-white/10 shadow-2xl flex flex-col">
-      {/* Header */}
+    <div className="absolute top-0 right-0 z-20 h-full w-full max-w-lg bg-neutral-950/85 backdrop-blur-3xl border-l border-white/10 shadow-2xl flex flex-col">
       <div className="p-5 border-b border-white/10 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
@@ -47,22 +48,35 @@ export function AnalyticsPanel() {
           </div>
           <div>
             <h3 className="text-lg font-bold text-white tracking-tight">Relatórios & Analytics</h3>
-            <p className="text-xs text-white/50">Análise de intensidade radiativa e estatísticas</p>
+            <p className="text-xs text-white/50">Histórico de focos, causas e situação atual</p>
           </div>
         </div>
         <button
           onClick={() => setActiveView('map')}
+          aria-label="Fechar relatórios"
           className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/10 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto p-5 space-y-6 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+        <div className="space-y-2">
+          <h4 className="text-xs font-extrabold uppercase tracking-widest text-white/50">Região</h4>
+          <AnalyticsRegionFilter />
+        </div>
+
+        <HotspotHistorySection />
+
+        <CauseBreakdownSection />
+
+        <div className="pt-2 space-y-1 border-t border-white/10">
+          <h4 className="text-xs font-extrabold uppercase tracking-widest text-white/50">Situação atual no mapa</h4>
+          <p className="text-[10px] text-white/40">Eventos da janela de tempo e dos filtros do mapa.</p>
+        </div>
+
         <TimeWindowSelector compact />
 
-        {/* KPI Grid */}
         <div className="grid grid-cols-2 gap-3">
           <StatCard
             label="Total de Eventos"
@@ -97,7 +111,6 @@ export function AnalyticsPanel() {
           />
         </div>
 
-        {/* State Ranking */}
         <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-xl space-y-3">
           <h4 className="text-xs font-extrabold uppercase tracking-widest text-white/50">
             Estados Mais Afetados
@@ -126,13 +139,11 @@ export function AnalyticsPanel() {
           </div>
         </div>
 
-        {/* Satellite Breakdown */}
         <SatelliteBreakdown
           satelliteCounts={satelliteCounts}
           totalAnomalies={metrics.totalAnomalies}
         />
 
-        {/* Export Data Button */}
         <button
           onClick={() => {
             const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(fireEvents, null, 2));
