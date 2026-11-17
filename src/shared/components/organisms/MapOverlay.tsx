@@ -1,7 +1,7 @@
 import { useDerivedMetrics } from '@/features/dashboard/hooks/useDerivedMetrics';
 import { Flame, AlertTriangle } from 'lucide-react';
 import { TimeWindowSelector } from '../molecules/TimeWindowSelector';
-import { BiomeSelector } from '../molecules/BiomeSelector';
+import { MapFiltersPanel } from '../molecules/MapFiltersPanel';
 import { DisplayModeSelector } from '../molecules/DisplayModeSelector';
 import { LastUpdateBadge } from '../molecules/LastUpdateBadge';
 import { StatCard } from '../atoms/StatCard';
@@ -18,11 +18,11 @@ export function MapOverlay() {
           <LastUpdateBadge isFetching={isFetching} />
         </div>
 
-        {/* Right Side: Display Mode, Time and Biome Filter Selectors */}
+        {/* Right Side: Display Mode, Time Window and Map Filters */}
         <div className="pointer-events-auto flex flex-col items-end gap-2">
           <DisplayModeSelector />
           <TimeWindowSelector />
-          <BiomeSelector />
+          <MapFiltersPanel />
         </div>
       </div>
 

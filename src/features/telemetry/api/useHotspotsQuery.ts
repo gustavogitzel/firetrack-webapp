@@ -3,20 +3,23 @@ import { useAtomValue } from 'jotai';
 import { HOTSPOTS_MAX_HOURS, telemetryFiltersAtom } from '@/state/filters.atoms';
 import { queryKeys } from '@/core/lib/query-keys';
 import { apiClient } from '@/core/lib/api-client';
+import { periodParams } from '../utils/period';
 import { HotspotCollectionSchema } from '../schemas/telemetry.schema';
 import type { HotspotCollection } from '../schemas/telemetry.schema';
 
 export function useHotspotsQuery(enabled: boolean) {
   const filters = useAtomValue(telemetryFiltersAtom);
-  const hours = Math.min(filters.hours, HOTSPOTS_MAX_HOURS);
 
   return useQuery({
-    queryKey: queryKeys.telemetry.hotspots({ hours, biome: filters.biome }),
+    queryKey: queryKeys.telemetry.hotspots(filters),
     queryFn: async (): Promise<HotspotCollection> => {
       const response = await apiClient.get('/api/v1/anomalies/current', {
         params: {
-          hours,
+          ...periodParams(filters, HOTSPOTS_MAX_HOURS),
           biome: filters.biome ?? undefined,
+          state: filters.state ?? undefined,
+          municipality_name: filters.municipality || undefined,
+          satellite: filters.satellite ?? undefined,
         },
       });
       return HotspotCollectionSchema.parse(response.data);

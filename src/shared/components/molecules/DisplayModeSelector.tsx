@@ -3,8 +3,9 @@ import { useAtom, useAtomValue } from 'jotai';
 import {
   HOTSPOTS_MAX_HOURS,
   mapDisplayModeAtom,
-  timeWindowHoursAtom,
+  telemetryFiltersAtom,
 } from '@/state/filters.atoms';
+import { periodHours } from '@/features/telemetry/utils/period';
 import type { MapDisplayMode } from '@/state/filters.atoms';
 
 const MODES: { label: string; value: MapDisplayMode }[] = [
@@ -14,8 +15,8 @@ const MODES: { label: string; value: MapDisplayMode }[] = [
 
 export function DisplayModeSelector() {
   const [mode, setMode] = useAtom(mapDisplayModeAtom);
-  const hours = useAtomValue(timeWindowHoursAtom);
-  const isCapped = mode === 'hotspots' && hours > HOTSPOTS_MAX_HOURS;
+  const filters = useAtomValue(telemetryFiltersAtom);
+  const isCapped = mode === 'hotspots' && periodHours(filters) > HOTSPOTS_MAX_HOURS;
 
   return (
     <div className="flex flex-col items-end gap-1">
@@ -47,7 +48,9 @@ export function DisplayModeSelector() {
       </div>
       {isCapped && (
         <span className="px-2.5 py-1 rounded-xl bg-black/60 border border-white/10 text-[10px] font-semibold text-white/60">
-          Focos individuais limitados às últimas {HOTSPOTS_MAX_HOURS}h
+          {filters.dateRange
+            ? `Focos individuais limitados às ${HOTSPOTS_MAX_HOURS}h finais do período`
+            : `Focos individuais limitados às últimas ${HOTSPOTS_MAX_HOURS}h`}
         </span>
       )}
     </div>

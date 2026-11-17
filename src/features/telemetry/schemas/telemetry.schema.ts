@@ -91,6 +91,16 @@ export const LastUpdateSchema = z.object({
   ),
 });
 
+// ── Satellites (/api/v1/anomalies/satellites) ───────────────────────
+
+export const SatelliteListSchema = z.array(
+  z.object({
+    source: z.string(),
+    satellite: z.string(),
+    detections: z.number(),
+  }),
+);
+
 // ── Weather (point-level: /api/v1/weather/snapshot) ─────────────────
 
 export const WeatherSnapshotSchema = z.object({
@@ -116,3 +126,4 @@ export type WeatherSnapshot = z.infer<typeof WeatherSnapshotSchema>;
 export type HotspotProperties = z.infer<typeof HotspotPropertiesSchema>;
 export type HotspotCollection = z.infer<typeof HotspotCollectionSchema>;
 export type LastUpdate = z.infer<typeof LastUpdateSchema>;
+export type SatelliteList = z.infer<typeof SatelliteListSchema>;

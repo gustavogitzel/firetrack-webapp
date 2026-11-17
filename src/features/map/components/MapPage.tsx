@@ -1,8 +1,8 @@
 import Map, { Source, Layer, type MapLayerMouseEvent } from 'react-map-gl/maplibre';
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { useState, useCallback, useMemo, useEffect } from 'react';
-import { useAtom } from 'jotai';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useAtom, useAtomValue } from 'jotai';
 import { Loader2 } from 'lucide-react';
 import { MapContext } from '../hooks/useMapInstance';
 import { selectedEventIdAtom, mapFlyToTargetAtom } from '@/state/selection.atoms';
@@ -12,6 +12,7 @@ import {
   enableHeatmapAtom,
   enableRegionRiskMapAtom,
   mapDisplayModeAtom,
+  telemetryFiltersAtom,
 } from '@/state/filters.atoms';
 import { useFireEventsQuery } from '@/features/telemetry/api/useFireEventsQuery';
 import { useHotspotsQuery } from '@/features/telemetry/api/useHotspotsQuery';
@@ -101,6 +102,9 @@ const TOPO_STYLE: any = {
   ],
 };
 
+const INITIAL_VIEW = { longitude: -52, latitude: -11, zoom: 4.5 };
+const OVERLAY_PADDING = { top: 90, bottom: 230, left: 60, right: 340 };
+
 const MAP_STYLES: Record<string, any> = {
   dark: DARK_STYLE,
   satellite: SATELLITE_STYLE,
@@ -127,6 +131,35 @@ export function MapPage() {
 
   const { data: fireEvents } = useFireEventsQuery();
   const { data: hotspots } = useHotspotsQuery(displayMode === 'hotspots');
+
+  const filters = useAtomValue(telemetryFiltersAtom);
+  const hasRegionFilter = Boolean(filters.state || filters.municipality || filters.biome);
+  const regionKey = hasRegionFilter
+    ? [filters.state, filters.municipality, filters.biome, displayMode].join('|')
+    : '';
+  const fittedRegionRef = useRef(regionKey);
+
+  useEffect(() => {
+    if (!mapInstance || fittedRegionRef.current === regionKey) return;
+
+    const points =
+      displayMode === 'hotspots'
+        ? hotspots?.features.map((f) => f.geometry.coordinates)
+        : fireEvents?.map((e) => [e.centroid.longitude, e.centroid.latitude] as [number, number]);
+    if (!points) return;
+
+    fittedRegionRef.current = regionKey;
+
+    if (!hasRegionFilter) {
+      mapInstance.flyTo({ center: [INITIAL_VIEW.longitude, INITIAL_VIEW.latitude], zoom: INITIAL_VIEW.zoom, duration: 1200 });
+      return;
+    }
+    if (points.length === 0) return;
+
+    const bounds = new maplibregl.LngLatBounds(points[0], points[0]);
+    points.forEach((point) => bounds.extend(point));
+    mapInstance.fitBounds(bounds, { padding: OVERLAY_PADDING, maxZoom: 9, duration: 1200 });
+  }, [mapInstance, regionKey, hasRegionFilter, displayMode, hotspots, fireEvents]);
 
   const geojsonData = useMemo(() => {
     if (!fireEvents) return null;
@@ -244,9 +277,7 @@ export function MapPage() {
           <Map
             mapLib={maplibregl as any}
             initialViewState={{
-              longitude: -52,
-              latitude: -11,
-              zoom: 4.5,
+              ...INITIAL_VIEW,
               pitch: 0,
               bearing: 0,
             }}

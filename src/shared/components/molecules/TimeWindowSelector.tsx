@@ -1,6 +1,6 @@
 import { Clock } from 'lucide-react';
-import { useAtom } from 'jotai';
-import { timeWindowHoursAtom } from '@/state/filters.atoms';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { dateRangeAtom, selectTimeWindowAtom, timeWindowHoursAtom } from '@/state/filters.atoms';
 
 const TIME_FILTERS = [
   { label: '24h', value: 24 },
@@ -15,7 +15,9 @@ interface TimeWindowSelectorProps {
 }
 
 export function TimeWindowSelector({ compact = false, className = '' }: TimeWindowSelectorProps) {
-  const [timeWindow, setTimeWindow] = useAtom(timeWindowHoursAtom);
+  const timeWindow = useAtomValue(timeWindowHoursAtom);
+  const dateRange = useAtomValue(dateRangeAtom);
+  const setTimeWindow = useSetAtom(selectTimeWindowAtom);
 
   return (
     <div
@@ -31,7 +33,7 @@ export function TimeWindowSelector({ compact = false, className = '' }: TimeWind
       )}
       <div className="flex gap-1">
         {TIME_FILTERS.map((filter) => {
-          const isActive = timeWindow === filter.value;
+          const isActive = !dateRange && timeWindow === filter.value;
           return (
             <button
               key={filter.value}

@@ -3,6 +3,7 @@ import { useAtomValue } from 'jotai';
 import { telemetryFiltersAtom } from '@/state/filters.atoms';
 import { queryKeys } from '@/core/lib/query-keys';
 import { apiClient } from '@/core/lib/api-client';
+import { periodParams } from '../utils/period';
 import { FireEventsListSchema } from '../schemas/telemetry.schema';
 import type { FireEventSummary } from '../schemas/telemetry.schema';
 
@@ -14,9 +15,12 @@ export function useFireEventsQuery() {
     queryFn: async (): Promise<FireEventSummary[]> => {
       const response = await apiClient.get('/api/v1/fire-events/current', {
         params: {
-          hours: filters.hours,
+          ...periodParams(filters),
           min_anomalies: filters.minAnomalies,
           biome: filters.biome ?? undefined,
+          state: filters.state ?? undefined,
+          municipality: filters.municipality || undefined,
+          satellite: filters.satellite ?? undefined,
         },
       });
       return FireEventsListSchema.parse(response.data);
